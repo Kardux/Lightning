@@ -27,6 +27,8 @@ public class LightningArc : MonoBehaviour
 	//////////////////////////////////////////////////////////////////////////
 	//VARIABLES
 	//////////////////////////////////////////////////////////////////////////
+    public enum ArcMode { SingleSide, BothSide, MiddleAllowed };
+
     private LineRenderer m_LR;
 
     private Transform m_StartTransform;
@@ -35,10 +37,13 @@ public class LightningArc : MonoBehaviour
     private Material m_Material;
     private Color m_Color;
 
+    private ArcMode m_Mode;
+
     private int m_Segments;
 
+    private Vector3 m_Amplitude;
+
     private float m_Width;
-    private float m_Amplitude;
     private float m_Frequency;
 
     private float m_Timer;
@@ -60,15 +65,41 @@ public class LightningArc : MonoBehaviour
 
         m_Timer -= 1.0f / m_Frequency;
 
-        for (int i = 0; i < m_Segments; i ++)
+        switch (Random.Range(0, (int)m_Mode + 1))
         {
-            float _TmpAmplitude = (1.0f - Mathf.Abs(i - (m_Segments - 1) * 0.5f) / ((m_Segments - 1) * 0.5f)) * m_Amplitude;
-            m_LR.SetPosition(i, m_StartTransform.position + (m_EndTransform.position - m_StartTransform.position) * ((float)i / (m_Segments - 1)) + new Vector3(
-                Random.Range(- _TmpAmplitude, _TmpAmplitude), 
-                Random.Range(- _TmpAmplitude, _TmpAmplitude),
-                Random.Range(- _TmpAmplitude, _TmpAmplitude)));
-        }
+            case 0 :
+                for (int i = 0; i < m_Segments; i++)
+                {
+                    Vector3 _TmpAmplitude = (1.0f - Mathf.Abs(i - (m_Segments - 1) * 0.5f) / ((m_Segments - 1) * 0.5f)) * m_Amplitude;
+                    m_LR.SetPosition(i, m_StartTransform.position + (m_EndTransform.position - m_StartTransform.position) * ((float)i / (m_Segments - 1)) + new Vector3(
+                        Random.Range(0, _TmpAmplitude.x),
+                        Random.Range(0, _TmpAmplitude.y),
+                        Random.Range(0, _TmpAmplitude.z)));
+                }
+                break;
 
+            case 1:
+                for (int i = 0; i < m_Segments; i++)
+                {
+                    Vector3 _TmpAmplitude = (1.0f - Mathf.Abs(i - (m_Segments - 1) * 0.5f) / ((m_Segments - 1) * 0.5f)) * m_Amplitude;
+                    m_LR.SetPosition(i, m_StartTransform.position + (m_EndTransform.position - m_StartTransform.position) * ((float)i / (m_Segments - 1)) + new Vector3(
+                        Random.Range(0, -_TmpAmplitude.x),
+                        Random.Range(0, -_TmpAmplitude.y),
+                        Random.Range(0, -_TmpAmplitude.z)));
+                }
+                break;
+
+            case 2 :
+                for (int i = 0; i < m_Segments; i++)
+                {
+                    Vector3 _TmpAmplitude = (1.0f - Mathf.Abs(i - (m_Segments - 1) * 0.5f) / ((m_Segments - 1) * 0.5f)) * m_Amplitude;
+                    m_LR.SetPosition(i, m_StartTransform.position + (m_EndTransform.position - m_StartTransform.position) * ((float)i / (m_Segments - 1)) + new Vector3(
+                        Random.Range(- _TmpAmplitude.x * 0.5f, _TmpAmplitude.x * 0.5f),
+                        Random.Range(- _TmpAmplitude.y * 0.5f, _TmpAmplitude.y * 0.5f),
+                        Random.Range(- _TmpAmplitude.z * 0.5f, _TmpAmplitude.z * 0.5f)));
+                }
+                break;
+        }
 	}
 	//////////////////////////////////////////////////////////////////////////
 	#endregion
@@ -88,8 +119,13 @@ public class LightningArc : MonoBehaviour
         m_Material = Mat;
         m_Color = Col;
     }
-    
-    public void SetParameters(int Segments, float Width, float Amplitude, float Frequency)
+
+    public void SetMode(ArcMode Mode)
+    {
+        m_Mode = Mode;
+    }
+
+    public void SetParameters(int Segments, float Width, Vector3 Amplitude, float Frequency)
     {
         m_Segments = Segments;
         m_Width = Width;
